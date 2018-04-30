@@ -2,43 +2,41 @@
 import logging
 import unittest
 
-from mongolog import MongoHandler
+from pymongolog import MongoHandler
 
-try:
-    from pymongo import MongoClient as Connection
-except ImportError:
-    from pymongo import Connection
+import pymongo
 
 
 class TestAuth(unittest.TestCase):
 
     def setUp(self):
         """ Create an empty database that could be used for logging """
-        self.db_name = '_mongolog_auth'
-        self.collection_name = 'log'
-        self.user_name = 'MyUsername'
-        self.password = 'MySeCrEtPaSsWoRd'
+        self._dbname = '_mongolog_auth'
+        self._collection_name = 'log'
+        self._username = 'MyUsername'
+        self._password = 'MySeCrEtPaSsWoRd'
 
-        self.conn = Connection()
-        self.db = self.conn[self.db_name]
-        self.collection = self.db[self.collection_name]
+        self._conn = pymongo.MongoClient()
+        self._db = self._conn[self._dbname]
+        self._collection = self._db[self._collection_name]
 
-        self.conn.drop_database(self.db_name)
-        self.db.add_user(self.user_name, self.password)
+        self._conn.drop_database(self._dbname)
+        self._db.command("createUser", self._username, pwd=self._password)
+        #self._db.add_user(self._username, self._password)
 
     def tearDown(self):
         """ Drop used database """
-        self.conn.drop_database(self.db_name)
+        self._conn.drop_database(self._dbname)
 
     def testAuthentication(self):
         """ Logging example with authentication """
         log = logging.getLogger('authentication')
-        log.addHandler(MongoHandler(self.collection_name, self.db_name,
-                                    username=self.user_name,
-                                    password=self.password))
+
+        uri = "mongodb://" + self._username + ":" + self._password + "@localhost/" + self._dbname
+        log.addHandler(MongoHandler(mongodb_uri=uri, database=self._dbname, collection=self._collection_name))
 
         log.error('test')
 
-        message = self.collection.find_one({'levelname': 'ERROR',
+        message = self._collection.find_one({'levelname': 'ERROR',
                                             'msg': 'test'})
         self.assertEqual(message['msg'], 'test')

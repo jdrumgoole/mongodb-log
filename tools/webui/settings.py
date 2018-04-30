@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
 MONGO = {
-    'db': 'mongolog',
+    'db': 'pymongolog',
     'collection': 'log',
     'host': 'localhost',
     'port': None

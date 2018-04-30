@@ -8,7 +8,7 @@ except ImportError:
 long_description = open("README.rst").read()
 
 setup(
-    name='mongolog',
+    name='pymongolog',
     version='0.1.1',
     description='Centralized logging made simple using MongoDB',
     long_description=long_description,
@@ -17,8 +17,8 @@ setup(
     maintainer='Jorge Puente Sarrín',
     maintainer_email="puentesarrin@gmail.com",
     url='https://github.com/puentesarrin/mongodb-log',
-    packages=['mongolog'],
-    keywords=["mongolog", "logging", "mongo", "mongodb"],
+    packages=['pymongolog'],
+    keywords=["pymongolog", "logging", "mongo", "mongodb"],
     install_requires=['pymongo'],
     classifiers=[
         "Intended Audience :: Developers",

@@ -5,13 +5,8 @@ import logging
 
 from bson import InvalidDocument
 from datetime import datetime
-from pymongo.collection import Collection
+import pymongo
 from socket import gethostname
-
-try:
-    from pymongo import MongoClient as Connection
-except ImportError:
-    from pymongo import Connection
 
 if sys.version_info[0] >= 3:
     unicode = str
@@ -46,31 +41,38 @@ class MongoHandler(logging.Handler):
     """
 
     @classmethod
-    def to(cls, collection, db='mongolog', host='localhost', port=None,
-        username=None, password=None, level=logging.NOTSET):
+    def to(cls, mongodb_uri="mngodb://localhost:27017", database="AUDIT", collection="log",  level=logging.NOTSET):
         """ Create a handler for a given  """
-        return cls(collection, db, host, port, username, password, level)
+        return cls(mongodb_uri, database, collection, level)
 
-    def __init__(self, collection, db='mongolog', host='localhost', port=None,
-        username=None, password=None, level=logging.NOTSET):
+    def __init__(self, mongodb_uri="mongodb://localhost:27017", database="AUDIT", collection="log", level=logging.NOTSET):
+
+        #print( " {} {} {} {}".format( mongodb_uri, database, collection, level))
         """ Init log handler and store the collection handle """
         logging.Handler.__init__(self, level)
+
+        client = pymongo.MongoClient( host=mongodb_uri)
+
+        if isinstance( database, str):
+            self._database = client[database]
+        elif isinstance( database, pymongo.database.Database):
+            self._database = database
+        else:
+            raise TypeError( "'database' must be an instance of str or pymongo.database.Database")
+
         if isinstance(collection, str):
-            connection = Connection(host, port)
-            if username and password:
-                connection[db].authenticate(username, password)
-            self.collection = connection[db][collection]
-        elif isinstance(collection, Collection):
+            self.collection = self._database[collection]
+        elif isinstance(collection, pymongo.collection.Collection):
             self.collection = collection
         else:
-            raise TypeError('collection must be an instance of basestring or '
-                             'Collection')
+            raise TypeError("'collection' must be an instance of str or pymongo.collection.Collection")
+
         self.formatter = MongoFormatter()
 
     def emit(self, record):
         """ Store the record to the collection. Async insert """
         try:
-            self.collection.insert(self.format(record))
+            self.collection.insert_one(self.format(record))
         except InvalidDocument as e:
             logging.error("Unable to save log record: %s", e.message,
                 exc_info=True)

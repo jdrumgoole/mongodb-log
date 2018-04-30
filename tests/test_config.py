@@ -2,19 +2,12 @@
 import logging
 import unittest
 
-from mongolog import MongoHandler
+from pymongolog import MongoHandler
 from os.path import dirname, join
 
-try:
-    from logging.config import fileConfig, dictConfig
-except ImportError:
-    from logging.config import fileConfig
-    dictConfig = None #py<2.7
 
-try:
-    from pymongo import MongoClient as Connection
-except ImportError:
-    from pymongo import Connection
+from logging.config import fileConfig, dictConfig
+import pymongo
 
 
 class TestConfig(unittest.TestCase):
@@ -24,26 +17,27 @@ class TestConfig(unittest.TestCase):
         filename = join(dirname(__file__), 'logging-test.config')
         fileConfig(filename)
 
-        self.db_name = '_mongolog_test'
-        self.collection_name = 'log_test'
+        self._dbname = '_mongolog_test'
+        self._collection_name = 'log_test'
 
-        self.conn = Connection()
-        self.db = self.conn[self.db_name]
-        self.collection = self.db[self.collection_name]
+        self._conn = pymongo.MongoClient()
+        self._db = self._conn[self._dbname]
+        self._collection = self._db[self._collection_name]
 
-        self.conn.drop_database(self.db_name)
+        self._conn.drop_database(self._dbname)
+        self._db.command("createUser", "admin", pwd="password", roles=["readWrite"])
 
     def tearDown(self):
         """ Drop used database """
-        self.conn.drop_database(self.db_name)
+        self._conn.drop_database(self._dbname)
 
     def testLoggingFileConfiguration(self):
         log = logging.getLogger('example')
-        log.addHandler(MongoHandler(self.collection_name, self.db_name))
+        log.addHandler(MongoHandler(mongodb_uri="mongodb://localhost:27017", database=self._dbname, collection=self._collection_name ))
 
         log.debug('test')
 
-        message = self.collection.find_one({'levelname': 'DEBUG',
+        message = self._collection.find_one({'levelname': 'DEBUG',
                                             'msg': 'test'})
         self.assertEqual(message['msg'], 'test')
 
@@ -52,16 +46,17 @@ class TestDictConfig(unittest.TestCase):
 
     def setUp(self):
         """ Create an empty database that could be used for logging """
-        self.db_name = '_mongolog_test_dict'
-        self.collection_name = 'log_test'
+        self._dbname = '_mongolog_test_dict'
+        self._collection_name = 'log_test'
 
         self.configDict = {
             'version': 1,
             'handlers': {
                 'mongo': {
-                    'class': 'mongolog.handlers.MongoHandler',
-                    'db': self.db_name,
-                    'collection': self.collection_name,
+                    'class': 'pymongolog.handlers.MongoHandler',
+                    "mongodb_uri" : 'mongodb://localhost:27017',
+                    'database': self._dbname,
+                    'collection': self._collection_name,
                     'level': 'INFO'
                 }
             },
@@ -71,31 +66,28 @@ class TestDictConfig(unittest.TestCase):
             }
         }
 
-        self.conn = Connection()
-        self.db = self.conn[self.db_name]
-        self.collection = self.db[self.collection_name]
+        self._conn = pymongo.MongoClient()
+        self._db = self._conn[self._dbname]
+        self._collection = self._db[self._collection_name]
 
-        self.conn.drop_database(self.db_name)
+        self._conn.drop_database(self._dbname)
 
     def testLoggingDictConfiguration(self):
-        if dictConfig:
-            dictConfig(self.configDict)
-        else:
-            self.assertEqual('Python<2.7', 'Python<2.7')
-            return
+
+        dictConfig(self.configDict)
 
         log = logging.getLogger('dict_example')
-        log.addHandler(MongoHandler(self.collection_name, self.db_name))
+        log.addHandler(MongoHandler( database=self._dbname, collection=self._collection_name))
 
         log.debug('testing dictionary config')
 
-        message = self.collection.find_one({'levelname': 'DEBUG',
-                                            'msg': 'dict_example'})
+        message = self._collection.find_one({'levelname': 'DEBUG',
+                                             'msg': 'dict_example'})
         self.assertEqual(message, None,
             "Logger put debug message in when info level handler requested")
 
         log.info('dict_example')
-        message = self.collection.find_one({'levelname': 'INFO',
+        message = self._collection.find_one({'levelname': 'INFO',
                                             'msg': 'dict_example'})
         self.assertNotEqual(message, None,
             "Logger didn't insert message into database")
@@ -104,4 +96,4 @@ class TestDictConfig(unittest.TestCase):
 
     def tearDown(self):
         """ Drop used database """
-        self.conn.drop_database(self.db_name)
+        self._conn.drop_database(self._dbname)
