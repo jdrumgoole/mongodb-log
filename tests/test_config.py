@@ -2,7 +2,7 @@
 import logging
 import unittest
 
-from pymongolog import MongoHandler
+from pymongo_log import MongoHandler
 from os.path import dirname, join
 
 
@@ -24,7 +24,7 @@ class TestConfig(unittest.TestCase):
         self._db = self._conn[self._dbname]
         self._collection = self._db[self._collection_name]
 
-        self._conn.drop_database(self._dbname)
+        self._db.command("dropUser", "admin")
         self._db.command("createUser", "admin", pwd="password", roles=["readWrite"])
 
     def tearDown(self):
@@ -53,7 +53,7 @@ class TestDictConfig(unittest.TestCase):
             'version': 1,
             'handlers': {
                 'mongo': {
-                    'class': 'pymongolog.handlers.MongoHandler',
+                    'class': 'pymongo_log.handlers.MongoHandler',
                     "mongodb_uri" : 'mongodb://localhost:27017',
                     'database': self._dbname,
                     'collection': self._collection_name,

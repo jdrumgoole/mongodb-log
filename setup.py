@@ -1,29 +1,57 @@
-# -*- coding: utf-8 *-*
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils import setup
+'''
+Created on 25 Jul 2017
 
+@author: jdrumgoole
+'''
 
-long_description = open("README.rst").read()
+from pymongo_import.version import __VERSION__
 
+from setuptools import setup, find_packages
+import os
+import glob
+
+pyfiles = [ f for f in os.listdir( "." ) if f.endswith( ".py" ) ]
+
+    
 setup(
-    name='pymongolog',
-    version='0.1.1',
-    description='Centralized logging made simple using MongoDB',
-    long_description=long_description,
-    author='Andrei Savu',
-    author_email='contact@andreisavu.ro',
-    maintainer='Jorge Puente Sarrín',
-    maintainer_email="puentesarrin@gmail.com",
-    url='https://github.com/puentesarrin/mongodb-log',
-    packages=['pymongolog'],
-    keywords=["pymongolog", "logging", "mongo", "mongodb"],
-    install_requires=['pymongo'],
+    name = "pymongo_log",
+    version =__VERSION__,
+    
+    author = "Joe Drumgoole",
+    author_email = "joe@joedrumgoole.com",
+    description = "A logging handler to write python logging output to MongoDB",
+    long_description =
+    '''
+Write logging output to a MongoDB database (called AUDIT) via a custom logging handler.
+''',
+
+    license = "AGPL",
+    keywords = "MongoDB python logging",
+    url = "https://github.com/jdrumgoole/pymongo_log",
+    
     classifiers=[
-        "Intended Audience :: Developers",
-        "Operating System :: OS Independent",
-        "Programming Language :: Python",
-        "Topic :: System :: Logging",
-        "Topic :: Database"],
+        # How mature is this project? Common values are
+        #   3 - Alpha
+        #   4 - Beta
+        #   5 - Production/Stable
+        'Development Status :: 3 - Alpha',
+
+        # Indicate who your project is intended for
+        'Intended Audience :: Developers',
+
+
+        # Pick your license as you wish (should match "license" above)
+        'License :: OSI Approved :: GNU Affero General Public License v3',
+
+        # Specify the Python versions you support here. In particular, ensure
+        # that you indicate whether you support Python 2, Python 3 or both.
+        'Programming Language :: Python :: 3.6' ],
+   
+    install_requires = [  "pymongo",
+                          "nose"],
+       
+    packages=find_packages(),
+
+    test_suite='nose.collector',
+    tests_require=['nose'],
 )

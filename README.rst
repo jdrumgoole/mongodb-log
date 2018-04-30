@@ -57,6 +57,32 @@ Usage
 -----
 
 >>> import logging
+>>> from pymongo_log.handlers import MongoHandler
+>>>
+>>> log = logging.getLogger('demo')
+>>> log.setLevel(logging.DEBUG)
+>>> log.addHandler(MongoHandler.to(db='mongolog', collection='log'))
+>>>
+>>> log.debug('Some message')
+
+
+Check the samples folder for more details.
+
+
+
+>>> from mongolog.handlers import MongoHandler
+>>>
+>>> log = logging.getLogger('demo')
+>>> log.setLevel(logging.DEBUG)
+>>> log.addHandler(MongoHandler.to(db='mongolog', collection='log'))
+>>>
+>>> log.debug('Some message')
+
+
+Check the samples folder for more details.
+
+
+
 >>> from pymongolog.handlers import MongoHandler
 >>>
 >>> log = logging.getLogger('demo')

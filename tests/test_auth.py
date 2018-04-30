@@ -2,7 +2,7 @@
 import logging
 import unittest
 
-from pymongolog import MongoHandler
+from pymongo_log import MongoHandler
 
 import pymongo
 
@@ -20,13 +20,14 @@ class TestAuth(unittest.TestCase):
         self._db = self._conn[self._dbname]
         self._collection = self._db[self._collection_name]
 
-        self._conn.drop_database(self._dbname)
-        self._db.command("createUser", self._username, pwd=self._password)
+        self._db.command( "dropUser", self._username)
+        self._db.command("createUser", self._username, pwd=self._password, roles=["readWrite"])
         #self._db.add_user(self._username, self._password)
 
     def tearDown(self):
         """ Drop used database """
         self._conn.drop_database(self._dbname)
+        self._db.command( "dropUser", self._username)
 
     def testAuthentication(self):
         """ Logging example with authentication """

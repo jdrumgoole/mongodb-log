@@ -2,7 +2,7 @@
 import logging
 import unittest
 
-from pymongolog import MongoHandler
+from pymongo_log import MongoHandler
 
 import pymongo
 
@@ -42,7 +42,9 @@ class TestRootLoggerHandler(unittest.TestCase):
         """ Logging example with exception """
         log = logging.getLogger('exception')
         log.setLevel(logging.DEBUG)
-        log.addHandler(MongoHandler(self.collection_name, self.db_name))
+        log.addHandler(MongoHandler(mongodb_uri="mongodb://localhost:27017",
+                                    database=self.db_name,
+                                    collection=self.collection_name))
 
         try:
             1 / 0
