@@ -4,4 +4,4 @@ __version__ = (0, 1, 0)
 __maintainer__ = 'Jorge Puente Sarrín <puentesarrin@gmail.com>'
 
 
-from pymongo_log.handlers import MongoHandler
+from pymongo_logging.handlers import MongoHandler

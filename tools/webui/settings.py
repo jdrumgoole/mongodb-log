@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
 MONGO = {
-    'db': 'pymongo_log',
+    'db': 'pymongo_logging',
     'collection': 'log',
     'host': 'localhost',
     'port': None

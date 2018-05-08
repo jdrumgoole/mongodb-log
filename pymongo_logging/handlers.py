@@ -16,17 +16,17 @@ class MongoFormatter(logging.Formatter):
         """Format exception object as a string"""
         data = record.__dict__.copy()
 
-        if record.args:
-            msg = record.msg % record.args
-        else:
-            msg = record.msg
+        # if record.args:
+        #     msg = record.msg % record.args
+        # else:
+        #     msg = record.msg
 
         data.update(
             username=getpass.getuser(),
             time=datetime.now(),
             host=gethostname(),
-            message=msg,
-            args=tuple(unicode(arg) for arg in record.args)
+            #args=tuple(unicode(arg) for arg in record.args)
+            args=record.args
         )
         if 'exc_info' in data and data['exc_info']:
             data['exc_info'] = self.formatException(data['exc_info'])
@@ -61,18 +61,24 @@ class MongoHandler(logging.Handler):
             raise TypeError( "'database' must be an instance of str or pymongo.database.Database")
 
         if isinstance(collection, str):
-            self.collection = self._database[collection]
+            self._collection = self._database[collection]
         elif isinstance(collection, pymongo.collection.Collection):
-            self.collection = collection
+            self._collection = collection
         else:
             raise TypeError("'collection' must be an instance of str or pymongo.collection.Collection")
 
         self.formatter = MongoFormatter()
 
+    def get_database(self):
+        return self._database
+
+    def get_collection(self):
+        return self._collection
+
     def emit(self, record):
         """ Store the record to the collection. Async insert """
         try:
-            self.collection.insert_one(self.format(record))
+            self._collection.insert_one(self.format(record))
         except InvalidDocument as e:
             logging.error("Unable to save log record: %s", e.message,
                 exc_info=True)

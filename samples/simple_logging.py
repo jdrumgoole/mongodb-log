@@ -4,14 +4,14 @@ sys.path.append('..')
 
 import logging
 
-from pymongo_log import MongoHandler
+from pymongo_logging import MongoHandler
 
 if __name__ == '__main__':
 
     log = logging.getLogger('example')
     log.setLevel(logging.DEBUG)
 
-    log.addHandler(MongoHandler.to('pymongo_log', 'log'))
+    log.addHandler(MongoHandler.to('pymongo_logging', 'log'))
 
     log.debug("1 - debug message")
     log.info("2 - info message")

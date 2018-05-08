@@ -1,10 +1,10 @@
-'''
+"""
 Created on 25 Jul 2017
 
 @author: jdrumgoole
-'''
+"""
 
-from pymongo_import.version import __VERSION__
+from pymongo_logging.version import __VERSION__
 
 from setuptools import setup, find_packages
 import os
@@ -14,7 +14,7 @@ pyfiles = [ f for f in os.listdir( "." ) if f.endswith( ".py" ) ]
 
     
 setup(
-    name = "pymongo_log",
+    name = "pymongo_logging",
     version =__VERSION__,
     
     author = "Joe Drumgoole",
@@ -27,7 +27,7 @@ Write logging output to a MongoDB database (called AUDIT) via a custom logging h
 
     license = "AGPL",
     keywords = "MongoDB python logging",
-    url = "https://github.com/jdrumgoole/pymongo_log",
+    url = "https://github.com/jdrumgoole/pymongo_logging",
     
     classifiers=[
         # How mature is this project? Common values are

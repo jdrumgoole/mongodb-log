@@ -2,7 +2,7 @@
 import logging
 import unittest
 
-from pymongo_log import MongoHandler
+from pymongo_logging import MongoHandler
 
 import pymongo
 
@@ -20,7 +20,10 @@ class TestAuth(unittest.TestCase):
         self._db = self._conn[self._dbname]
         self._collection = self._db[self._collection_name]
 
-        self._db.command( "dropUser", self._username)
+        try:
+            self._db.command( "dropUser", self._username)
+        except pymongo.errors.OperationFailure:
+            pass
         self._db.command("createUser", self._username, pwd=self._password, roles=["readWrite"])
         #self._db.add_user(self._username, self._password)
 
@@ -34,10 +37,18 @@ class TestAuth(unittest.TestCase):
         log = logging.getLogger('authentication')
 
         uri = "mongodb://" + self._username + ":" + self._password + "@localhost/" + self._dbname
-        log.addHandler(MongoHandler(mongodb_uri=uri, database=self._dbname, collection=self._collection_name))
+        log.addHandler(MongoHandler(mongodb_uri=uri, database=self._db, collection=self._collection))
 
         log.error('test')
 
         message = self._collection.find_one({'levelname': 'ERROR',
-                                            'msg': 'test'})
+                                              'msg': 'test'})
+
+        #print("uri:{}".format(uri))
+        # for i in self._collection.find() :
+        #     print(i)
+
         self.assertEqual(message['msg'], 'test')
+
+if __name__ == '__main__':
+    unittest.main()
