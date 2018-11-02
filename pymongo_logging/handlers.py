@@ -41,7 +41,8 @@ class MongoHandler(logging.Handler):
     """
 
     @classmethod
-    def to(cls, mongodb_uri="mngodb://localhost:27017", database="AUDIT", collection="log",  level=logging.NOTSET):
+    def to(cls, database="AUDIT", collection="log",
+           mongodb_uri="mongodb://localhost:27017", level=logging.NOTSET):
         """ Create a handler for a given  """
         return cls(mongodb_uri, database, collection, level)
 
@@ -78,6 +79,7 @@ class MongoHandler(logging.Handler):
     def emit(self, record):
         """ Store the record to the collection. Async insert """
         try:
+            record.created = datetime.fromtimestamp(record.created)
             self._collection.insert_one(self.format(record))
         except InvalidDocument as e:
             logging.error("Unable to save log record: %s", e.message,

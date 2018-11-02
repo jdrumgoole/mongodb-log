@@ -24,7 +24,11 @@ class TestConfig(unittest.TestCase):
         self._db = self._conn[self._dbname]
         self._collection = self._db[self._collection_name]
 
-        self._db.command("dropUser", "admin")
+        info = self._db.command("usersInfo")
+
+        if any(x["user"]=="admin" for x in info["users"]):
+            self._db.command("dropUser", "admin")
+
         self._db.command("createUser", "admin", pwd="password", roles=["readWrite"])
 
     def tearDown(self):
